@@ -1,18 +1,12 @@
-name: Docker Image CI
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker Image for Backend
+        run: docker build -t backend-image -f bitcoin-price/Dockerfile .
+
+      - name: Build Docker Image for Frontend
+        run: docker build -t frontend-image -f frontend/Dockerfile .
