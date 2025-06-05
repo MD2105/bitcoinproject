@@ -2,21 +2,21 @@ import { useState } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
 export default function App() {
   const [start, setStart] = useState(new Date());
   const [end, setEnd] = useState(new Date());
   const [offline, setOffline] = useState(false);
   const [prices, setPrices] = useState([]);
   const [error, setError] = useState('');
-
   const isValidDate = (date) => {
     return date instanceof Date && !isNaN(date);
   };
    
+
   const fetchPrices = async () => {
     setError('');
-    // Frontend validation
+ 
+    
     if (!isValidDate(start) || !isValidDate(end)) {
       setError('Please select valid start and end dates.');
       return;
@@ -33,12 +33,15 @@ export default function App() {
       );
       setPrices(res.data);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        'Failed to fetch prices. Please check your input or try again later.'
-      );
+      console.error('Error fetching prices:', err);
+      let msg = err.response?.data?.message || 'Failed to fetch prices. Please check your input or try again later.';
+      if (msg === 'Public API not available') {
+        msg = 'Bitcoin price service is temporarily unavailable. Please try again later or use offline mode if available.';
+      }
+      setError(msg);
     }
   };
+
 
   return (
     <div style={{ padding: 20 }}>

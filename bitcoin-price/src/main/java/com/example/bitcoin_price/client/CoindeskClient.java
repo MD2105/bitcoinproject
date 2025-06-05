@@ -1,25 +1,29 @@
 package com.example.bitcoin_price.client;
+
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Component
 public class CoindeskClient {
-     private final WebClient webClient;
-    public CoindeskClient(WebClient coindeskWebClient) {
-        this.webClient = coindeskWebClient;
+    private final RestTemplate restTemplate;
+
+    public CoindeskClient() {
+        this.restTemplate = new RestTemplate();
     }
-    public Mono<Map<String, Double>> getHistoricalPrices(String start, String end) {
-        return webClient.get()
-            .uri(uri -> uri.path("/historical/close.json")
-                           .queryParam("start", start)
-                           .queryParam("end", end)
-                           .build())
-            .retrieve()
-            .bodyToMono(HistoricalResponse.class)
-            .map(HistoricalResponse::getBpi);
+
+    public Map<String, Double> getHistoricalPricesSync(String start, String end) {
+        String url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=" + start + "&end=" + end;
+        try {
+            HistoricalResponse response = restTemplate.getForObject(url, HistoricalResponse.class);
+            return response != null ? response.getBpi() : Map.of();
+        } catch (RestClientException ex) {
+            
+            throw ex; 
+        }
     }
+
     private static class HistoricalResponse {
         private Map<String, Double> bpi;
         public Map<String, Double> getBpi() { return bpi; }
