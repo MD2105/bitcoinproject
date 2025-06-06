@@ -7,11 +7,19 @@ pipeline {
     }
 
     stages {
+        stage('Check Docker Access') {
+            steps {
+                echo 'Checking Docker CLI access from Jenkins...'
+                sh 'docker version'
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+
         stage('Build & Test Backend') {
             steps {
                 dir('bitcoin-price') {
@@ -19,6 +27,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Build & Push Backend') {
             steps {
                 script {
@@ -31,6 +40,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -39,6 +49,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Build & Push Frontend') {
             steps {
                 script {
@@ -51,10 +62,11 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
-                // Add your deployment commands here (e.g., kubectl apply ...)
+                // Add your deployment commands here
             }
         }
     }
