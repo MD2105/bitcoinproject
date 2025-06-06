@@ -20,14 +20,17 @@ pipeline {
             }
         }
         stage('Docker Build & Push Backend') {
-    steps {
-        dir('bitcoin-price') {
-            sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-            sh "docker build -t $DOCKERHUB_CREDENTIALS_USR/bitcoin-backend:latest ."
-            sh "docker push $DOCKERHUB_CREDENTIALS_USR/bitcoin-backend:latest"
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
+                        dir('bitcoin-price') {
+                            def backendImage = docker.build("${DOCKERHUB_USER}/bitcoin-backend:latest")
+                            backendImage.push()
+                        }
+                    }
+                }
+            }
         }
-    }
-}
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
@@ -36,15 +39,18 @@ pipeline {
                 }
             }
         }
-        stage('Docker Build & Push Backend') {
-    steps {
-        dir('bitcoin-price') {
-            sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-            sh "docker build -t $DOCKERHUB_CREDENTIALS_USR/bitcoin-backend:latest ."
-            sh "docker push $DOCKERHUB_CREDENTIALS_USR/bitcoin-backend:latest"
+        stage('Docker Build & Push Frontend') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
+                        dir('frontend') {
+                            def frontendImage = docker.build("${DOCKERHUB_USER}/bitcoin-frontend:latest")
+                            frontendImage.push()
+                        }
+                    }
+                }
+            }
         }
-    }
-}
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
