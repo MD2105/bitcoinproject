@@ -1,7 +1,6 @@
 package com.example.bitcoin_price.service;
 import com.example.bitcoin_price.client.CoindeskClient;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

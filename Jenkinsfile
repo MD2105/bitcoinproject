@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Prepend the Homebrew bin directory so npm/node are found
         PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         DOCKERHUB_USER        = "${DOCKERHUB_CREDENTIALS_USR}"
@@ -14,9 +13,13 @@ pipeline {
                 sh 'docker version'
             }
         }
+
         stage('Checkout') {
-            steps { checkout scm }
+            steps {
+                checkout scm
+            }
         }
+
         stage('Build & Test Backend') {
             steps {
                 dir('bitcoin-price') {
@@ -24,6 +27,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Build & Push Backend') {
             steps {
                 script {
@@ -37,16 +41,17 @@ pipeline {
                 }
             }
         }
+
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    // Now npm should be on PATH
                     sh 'echo $PATH'
                     sh 'npm ci'
                     sh 'npm run build'
                 }
             }
         }
+
         stage('Docker Build & Push Frontend') {
             steps {
                 script {
@@ -60,9 +65,24 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
+                script {
+                    echo 'Deploying with Docker Compose...'
+                    dir('deploy') {
+                        sh 'docker compose pull'
+                        sh 'docker compose up -d'
+                    }
+
+                    // -- Kubernetes alternative (uncomment to use) --
+                     echo 'Deploying to Kubernetes...'
+                    dir('k8s') {
+                         sh 'kubectl apply -f deployment.yaml'
+                         sh 'kubectl rollout status deployment/bitcoin-backend'
+                         sh 'kubectl rollout status deployment/bitcoin-frontend'
+                     }
+                }
             }
         }
     }

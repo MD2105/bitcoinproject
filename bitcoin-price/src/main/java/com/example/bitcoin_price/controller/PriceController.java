@@ -1,5 +1,4 @@
 package com.example.bitcoin_price.controller;
-
 import com.example.bitcoin_price.dto.ErrorResponse;
 import org.springframework.web.bind.annotation.RestController;
 

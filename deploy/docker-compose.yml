@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    image: manishmd21/bitcoin-backend:latest
+    container_name: bitcoin-backend
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - bitcoin-network
+
+  frontend:
+    image: manishmd21/bitcoin-frontend:latest
+    container_name: bitcoin-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - bitcoin-network
+
+networks:
+  bitcoin-network:
+    driver: bridge
