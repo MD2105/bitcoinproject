@@ -1,32 +1,45 @@
 package com.example.bitcoin_price.client;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.*;
 
+
+
+
+
+@Slf4j
 @Component
+
 public class CoindeskClient {
-    private final RestTemplate restTemplate;
 
-    public CoindeskClient() {
-        this.restTemplate = new RestTemplate();
-    }
+    @Autowired
+    private RestTemplate restTemplate;
+    public Map<String, Double> getBitcoinPrices(LocalDate start, LocalDate end) {
+        long startEpoch = start.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
+        long endEpoch = end.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
 
-    public Map<String, Double> getHistoricalPricesSync(String start, String end) {
-        String url = "https://api.coindesk.com/v1/bpi/historical/close.json?start=" + start + "&end=" + end;
-        try {
-            HistoricalResponse response = restTemplate.getForObject(url, HistoricalResponse.class);
-            return response != null ? response.getBpi() : Map.of();
-        } catch (RestClientException ex) {
-            
-            throw ex; 
+        String url = String.format(
+            "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range" +
+            "?vs_currency=usd&from=%d&to=%d", startEpoch, endEpoch);
+
+        log.info("Calling CoinGecko API: {}", url);
+
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+
+        List<List<Object>> prices = (List<List<Object>>) response.get("prices");
+        Map<String, Double> result = new TreeMap<>();
+
+        for (List<Object> entry : prices) {
+            long timestamp = ((Number) entry.get(0)).longValue();
+            double price = ((Number) entry.get(1)).doubleValue();
+            String date = Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.UTC).toLocalDate().toString();
+            result.put(date, price);
         }
-    }
-
-    private static class HistoricalResponse {
-        private Map<String, Double> bpi;
-        public Map<String, Double> getBpi() { return bpi; }
-        public void setBpi(Map<String, Double> bpi) { this.bpi = bpi; }
+        return result;
     }
 }

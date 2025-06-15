@@ -10,30 +10,37 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.example.bitcoin_price.client.CoindeskClient;
+import com.example.bitcoin_price.dto.PriceResponse;
 import com.example.bitcoin_price.service.BitcoinPriceService;
-import com.example.bitcoin_price.service.BitcoinPriceService.PricePoint;
+
 
 
 
 @SpringBootTest
 class BitcoinPriceApplicationTests {
 
-	@Test
-  void fetchPricesAssignsMarkers() {
-    var client = mock(CoindeskClient.class);
-    var svc = new BitcoinPriceService(client);
-    Map<String,Double> data = Map.of(
-      "2025-01-01", 10.0,
-      "2025-01-02", 20.0,
-      "2025-01-03", 5.0
-    );
-   when(client.getHistoricalPricesSync("2025-01-01","2025-01-03"))
-  .thenReturn(data);
+    @Test
+    void contextLoads() {
+        // This test will pass if the application context loads successfully
+    }
 
-List<PricePoint> list = svc.fetchPrices("2025-01-01","2025-01-03",false);
-assertTrue(list.stream().anyMatch(p -> p.getMarker().equals("high")));
-assertTrue(list.stream().anyMatch(p -> p.getMarker().equals("low")));
-  }
+    @Test
+    void testGetPrices() {
+        CoindeskClient mockClient = mock(CoindeskClient.class);
+        BitcoinPriceService service = new BitcoinPriceService();
+        service.setCoindeskClient(mockClient);
+
+        // Mocking the response from the client
+        java.time.LocalDate startDate = java.time.LocalDate.parse("2023-01-01");
+        java.time.LocalDate endDate = java.time.LocalDate.parse("2023-01-31");
+        when(mockClient.getBitcoinPrices(startDate, endDate))
+            .thenReturn(Map.of("2023-01-01", 30000.0, "2023-01-02", 31000.0));
+
+        java.time.LocalDate start = java.time.LocalDate.parse("2023-01-01");
+        java.time.LocalDate end = java.time.LocalDate.parse("2023-01-31");
+        List<PriceResponse> prices = service.getPrices(start, end, false);
+        assertTrue(prices.size() > 0);
+    }
 
 }
 

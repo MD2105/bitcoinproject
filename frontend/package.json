@@ -13,9 +13,11 @@
   "dependencies": {
     "axios": "^1.9.0",
     "datepicker": "^0.0.0",
+    "paginate": "^0.2.0",
     "react": "^19.1.0",
     "react-datepicker": "^8.4.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-paginate": "^8.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
