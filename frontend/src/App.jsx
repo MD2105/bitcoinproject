@@ -81,7 +81,7 @@ export default function App() {
     const e = end.toISOString().slice(0, 10);
     try {
       const res = await axios.get(
-        `http://localhost:8081/api/v1/prices?start=${s}&end=${e}&offline=${offline}`
+        `http://localhost:8080/api/v1/prices?start=${s}&end=${e}&offline=${offline}`
       );
       setPrices(res.data);
     } catch (err) {
