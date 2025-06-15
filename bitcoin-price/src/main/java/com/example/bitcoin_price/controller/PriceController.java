@@ -18,7 +18,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@CrossOrigin(origins = {"http://localhost:5173", "https://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RestController
 public class PriceController {
 
