@@ -11,5 +11,5 @@ public class PriceResponse {
     private String date;
     private double price;
     private String marker;
-    private String currency; // "high", "low", or ""
+    private String currency; 
 }

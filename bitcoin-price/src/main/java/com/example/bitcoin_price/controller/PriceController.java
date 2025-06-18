@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,28 +34,6 @@ public ResponseEntity<?> getPrices(
     @RequestParam(name = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
     @RequestParam(name = "offline", defaultValue="false") boolean offline,
     @RequestParam(name = "currency", defaultValue="USD") String currency){
-        try {
-            if (start.isAfter(end)) {
-                logger.error("Start date {} is after end date {}", start, end);
-                return ResponseEntity.badRequest().body(new ErrorResponse("Start date cannot be after end date."));
-            }
-            if (start.isBefore(LocalDate.of(2013, 1, 1))) {
-                logger.error("Start date {} is before 2013-01-01", start);
-                return ResponseEntity.badRequest().body(new ErrorResponse("Start date cannot be before 2013-01-01."));
-            }
-            if (end.isAfter(LocalDate.now())) {
-                logger.error("End date {} is in the future", end);
-                return ResponseEntity.badRequest().body(new ErrorResponse("End date cannot be in the future."));
-            }
-            if (start.isEqual(end)) {
-                logger.error("Start date {} is the same as end date {}", start, end);
-                return ResponseEntity.badRequest().body(new ErrorResponse("Start date cannot be the same as end date."));
-            }
-        } catch (DateTimeParseException ex) {
-            logger.error("Invalid date format for start or end: start={}, end={}", start, end);
-            return ResponseEntity.badRequest().body(new ErrorResponse("Invalid date format. Expected yyyy-MM-dd."));
-        }
-
         try {
             List<PriceResponse> prices = service.getPrices(start,end, offline,currency);
             if (prices.isEmpty()) {

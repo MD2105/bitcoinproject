@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+
 export default function App() {
   const [start, setStart] = useState(new Date());
   const [end, setEnd] = useState(new Date());
@@ -9,22 +10,23 @@ export default function App() {
   const [prices, setPrices] = useState([]);
   const [error, setError] = useState('');
   const [currency, setCurrency] = useState('USD');
+
   const isValidDate = (date) => {
     return date instanceof Date && !isNaN(date);
   };
-  
-  const Pagination = ({ data, itemsPage=10}) =>{
+
+  const Pagination = ({ data, itemsPage = 10 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(data.length / itemsPage);
-    
+
     const handlePageChange = (page) => {
       setCurrentPage(page);
     };
-  
+
     const startIndex = (currentPage - 1) * itemsPage;
     const endIndex = startIndex + itemsPage;
     const currentData = data.slice(startIndex, endIndex);
-  
+
     return (
       <div>
         <table>
@@ -58,17 +60,11 @@ export default function App() {
         </div>
       </div>
     );
+  };
 
-  }
-  const sortedPrices = [
-    ...prices.filter(p=> p.marker === 'high'),
-    ...prices.filter(p=> p.marker === 'low'),
-    ...prices.filter(p=> p.marker !== 'high' && p.marker !== 'low')
-  ];
   const fetchPrices = async () => {
     setError('');
- 
-    
+
     if (!isValidDate(start) || !isValidDate(end)) {
       setError('Please select valid start and end dates.');
       return;
@@ -79,9 +75,10 @@ export default function App() {
     }
     const s = start.toISOString().slice(0, 10);
     const e = end.toISOString().slice(0, 10);
+
     try {
       const res = await axios.get(
-        `http://localhost:8081/api/v1/prices?start=${s}&end=${e}&offline=${offline}`
+        `http://localhost:8080/api/v1/prices?start=${s}&end=${e}&offline=${offline}&currency=${currency}`
       );
       setPrices(res.data);
     } catch (err) {
@@ -94,27 +91,32 @@ export default function App() {
     }
   };
 
+  const sortedPrices = [
+    ...prices.filter((p) => p.marker === 'high'),
+    ...prices.filter((p) => p.marker === 'low'),
+    ...prices.filter((p) => p.marker !== 'high' && p.marker !== 'low'),
+  ];
 
   return (
     <div style={{ padding: 90 }}>
       <h1>Bitcoin Price Viewer</h1>
       <div>
-        <DatePicker selected={start} onChange={d => setStart(d)} />
-        <DatePicker selected={end} onChange={d => setEnd(d)} />
+        <DatePicker selected={start} onChange={(d) => setStart(d)} />
+        <DatePicker selected={end} onChange={(d) => setEnd(d)} />
         <label>
           <input
             type="checkbox"
             checked={offline}
-            onChange={e => setOffline(e.target.checked)}
+            onChange={(e) => setOffline(e.target.checked)}
           />
           Offline Mode
         </label>
-        <select value={currency} onChange={e => setCurrency(e.target.value)}>
+        <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
           <option value="USD">USD</option>
           <option value="EUR">EUR</option>
           <option value="GBP">GBP</option>
           <option value="INR">INR</option>
-          </select>
+        </select>
         <button onClick={fetchPrices}>Fetch</button>
       </div>
       {error && (
@@ -131,7 +133,7 @@ export default function App() {
       )}
       <div style={{ marginTop: 20 }}>
         <p>Note: Prices marked in red are high, orange are low, and others are normal.</p>
-    </div>
+      </div>
     </div>
   );
 }
